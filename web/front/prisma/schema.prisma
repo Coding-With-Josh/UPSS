@@ -1,0 +1,356 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator custom_generator {
+    provider = "prisma-generator-fake-data"
+    output   = "../types/fake-data.ts"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String                 @id @default(cuid())
+  name                  String
+  email                 String                 @unique
+  emailVerified         DateTime?
+  image                 String?
+  password              String?
+  role                  Role                   @default(STUDENT)
+  gender                Gender?
+  status                StudentStatus          @default(ACTIVE)
+  isTwoFactorEnabled    Boolean                @default(false)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  accounts              Account[]
+  studentProfile        Student?
+  teacherProfile        Teacher?
+  twoFactorConfirmation TwoFactorConfirmation?
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model VerificationToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model PasswordResetToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorConfirmation {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Teacher {
+  id          String       @id @default(cuid())
+  userId      String       @unique
+  courses     Course[]
+  modules     Module[]
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignments Assignment[] @relation("AssignmentToTeacher")
+}
+
+model Student {
+  id                    String                 @id @default(cuid())
+  userId                String                 @unique
+  assessmentResults     AssessmentResult[]
+  assignmentSubmissions AssignmentSubmission[]
+  calendars             Calendar[]
+  enrollments           Enrollment[]
+  quizAttempts          QuizAttempt[]
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks                 Task[]
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  location    String?
+  calendarId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  calendar    Calendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+
+  @@index([calendarId])
+}
+
+model Calendar {
+  id        String   @id @default(cuid())
+  name      String
+  studentId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  events    Event[]
+
+  @@index([studentId])
+}
+
+model Classroom {
+  id          String       @id @default(cuid())
+  name        String
+  capacity    Int
+  schedules   Schedule[]
+  assignments Assignment[] @relation("AssignmentToClassroom")
+}
+
+model Enrollment {
+  id         String   @id @default(cuid())
+  studentId  String
+  courseId   String
+  enrolledAt DateTime @default(now())
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
+}
+
+model Schedule {
+  id          String    @id @default(cuid())
+  moduleId    String
+  classroomId String
+  dayOfWeek   Int
+  startTime   DateTime
+  endTime     DateTime
+  classroom   Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  module      Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([moduleId, classroomId, dayOfWeek, startTime])
+}
+
+model Task {
+  id           String       @id @default(cuid())
+  title        String
+  description  String?
+  dueDate      DateTime
+  status       TaskStatus   @default(TODO)
+  priority     TaskPriority @default(MEDIUM)
+  studentId    String
+  taskableType String
+  taskableId   String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, taskableType, taskableId])
+}
+
+model Assignment {
+  id          String                 @id @default(cuid())
+  moduleId    String
+  title       String
+  description String?
+  deadline    DateTime
+  fileUrl     String?
+  module      Module                 @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  submissions AssignmentSubmission[]
+  classroom   Classroom[]            @relation("AssignmentToClassroom")
+  teacher     Teacher[]              @relation("AssignmentToTeacher")
+
+  @@index([moduleId])
+}
+
+model AssignmentSubmission {
+  id           String     @id @default(cuid())
+  assignmentId String
+  studentId    String
+  fileUrl      String
+  submittedAt  DateTime   @default(now())
+  grade        Float?
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student      Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([assignmentId, studentId])
+}
+
+model Course {
+  id          String         @id @default(cuid())
+  title       String
+  description String?
+  teacherId   String
+  category    LessonCategory
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  teacher     Teacher        @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  enrollments Enrollment[]
+  modules     Module[]       @relation("CourseToModule")
+
+  @@index([teacherId])
+}
+
+model Module {
+  id           String         @id @default(cuid())
+  name         String
+  teacherId    String
+  category     LessonCategory
+  assessments  Assessment[]
+  assignments  Assignment[]
+  contentPages ContentPage[]
+  teacher      Teacher        @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  quizzes      Quiz[]
+  schedules    Schedule[]
+  courses      Course[]       @relation("CourseToModule")
+
+  @@index([teacherId])
+}
+
+model ContentPage {
+  id       String  @id @default(cuid())
+  moduleId String
+  title    String
+  content  String
+  videoUrl String?
+  order    Int
+  module   Module  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@index([moduleId])
+}
+
+model Quiz {
+  id        String        @id @default(cuid())
+  moduleId  String
+  title     String
+  questions Question[]
+  module    Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  attempts  QuizAttempt[]
+
+  @@index([moduleId])
+}
+
+model Question {
+  id      String   @id @default(cuid())
+  quizId  String
+  text    String
+  options String[]
+  answer  String
+  quiz    Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([quizId])
+}
+
+model QuizAttempt {
+  id        String    @id @default(cuid())
+  quizId    String
+  studentId String
+  score     Int
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+  quiz      Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([quizId, studentId])
+}
+
+model Assessment {
+  id       String             @id @default(cuid())
+  moduleId String
+  type     AssessmentType
+  title    String
+  dueDate  DateTime
+  maxScore Int
+  module   Module             @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  results  AssessmentResult[]
+
+  @@index([moduleId])
+}
+
+model AssessmentResult {
+  id           String     @id @default(cuid())
+  assessmentId String
+  studentId    String
+  score        Float
+  submittedAt  DateTime   @default(now())
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  student      Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([assessmentId, studentId])
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
+  EXPELLED
+}
+
+enum LessonCategory {
+  LANGUAGES
+  ART
+  SCIENCE
+  SOCIAL_SCIENCES
+}
+
+enum AssessmentType {
+  HOLIDAY_ASSIGNMENT
+  FIRST_TEST
+  SECOND_TEST
+  EXAMINATION
+  MOCK
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
