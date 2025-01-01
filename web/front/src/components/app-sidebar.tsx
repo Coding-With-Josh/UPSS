@@ -7,9 +7,10 @@ export async function AppSidebar() {
   const {getUser} = getKindeServerSession()
   const user = await getUser()
   const userProp = {
-    name:  `${user.given_name} " " ${user.family_name}`,
-    email: user.email
+    name:  `${user?.given_name} " " ${user?.family_name}`,
+    email: user?.email
   }
+  
 
   return (
     <ClientSidebar user={userProp} />

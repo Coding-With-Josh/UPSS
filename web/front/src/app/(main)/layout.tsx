@@ -9,6 +9,8 @@ import {
 const { getUser } = getKindeServerSession();
 const user = await getUser();
 
+{user && console.log(user)}
+
 export default async function MainLayout({
   children,
 }: Readonly<{

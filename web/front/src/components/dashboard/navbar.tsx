@@ -14,8 +14,9 @@ import {
 import { ModeToggle } from "../ui/mode-toggle";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "../ui/sidebar";
 import { usePathname } from "next/navigation";
-import { Bell } from "lucide-react";
+import { Bell, LogOut } from "lucide-react";
 import { Button } from "../ui/button";
+import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs";
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -51,6 +52,11 @@ export const Navbar = () => {
             <Bell size={18} />
           </Button>
           <ModeToggle />
+          <LogoutLink>
+          <Button size="icon" variant="ghost">
+            <LogOut size={18} />
+          </Button>
+          </LogoutLink>
         </div>
       </header>
     </>

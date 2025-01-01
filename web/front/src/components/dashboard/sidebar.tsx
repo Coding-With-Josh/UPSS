@@ -201,7 +201,7 @@ export async function ClientSidebar({ user, ...props }: ClientSidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/my">
+              <Link href={user ? "/my" : "http://upss.vercel.app?notLoggedIn"}>
                 <div className="flex size-8 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
                   <Image
                     src={require("@/assets/images/avatars/avatar1.png")}
