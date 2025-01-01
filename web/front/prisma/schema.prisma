@@ -29,11 +29,11 @@ enum Arm {
 
 model User {
   id                    String                 @id @default(uuid())
-  kindeId               String                 @unique
   email                 String                 @unique
   firstName             String
   lastName              String
-  name                  String?
+  username              String            @unique
+  name                  String?           @unique @default("")
   imageUrl              String?
   emailVerified         DateTime?
   password              String?
@@ -44,6 +44,7 @@ model User {
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   accounts              Account[]
+  sessions Session[]
   studentProfile        Student?
   teacherProfile        Teacher?
   twoFactorConfirmation TwoFactorConfirmation?
@@ -51,7 +52,23 @@ model User {
   arm                   Arm                    @default(Silver)
   conversations         Conversation[]         @relation("ConversationParticipants")
   messages              Message[]
+
+  @@index([class, arm, role, status])
 }
+
+
+model Session {
+
+  id        String   @id
+
+  userId    String
+
+  expiresAt DateTime
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+}
+
 
 model Account {
   id                String  @id @default(cuid())

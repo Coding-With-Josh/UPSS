@@ -10,6 +10,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Navbar } from "@/components/dashboard/navbar";
 import { Loader } from "@/components/reusable/loader";
 import AuthProvider from "./provider";
+import { Toaster } from "@/components/ui/toaster";
 
 const font = localFont({
   src: "./fonts/Karla-Regular.ttf",
@@ -28,26 +29,25 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <AuthProvider>
-      <html lang="en">
-        <body className={font.className}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Loader />
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <Navbar />
-                {children}
-              </SidebarInset>
-            </SidebarProvider>
-          </ThemeProvider>
-        </body>
-      </html>
-    </AuthProvider>
+    <html lang="en">
+      <body className={font.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Loader />
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>
+              <Navbar />
+              {children}
+              <Toaster />
+            </SidebarInset>
+          </SidebarProvider>
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }

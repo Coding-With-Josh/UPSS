@@ -5,34 +5,22 @@ import {
   getKindeServerSession,
   LoginLink,
 } from "@kinde-oss/kinde-auth-nextjs/server";
+import { redirect } from "next/navigation";
 
 const { getUser } = getKindeServerSession();
 const user = await getUser();
 
-{user && console.log(user)}
+{
+  user && console.log(user);
+}
+{
+  !user && redirect("/sign-in");
+}
 
 export default async function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <>
-      {!user || window.location.pathname.endsWith("?notLoggedIn") && (
-        <div className="h-screen w-screen flex items-center justify-center bg-black/30">
-          <Card>  
-            <CardHeader>Login to access your account</CardHeader>
-            <CardContent>
-              <LoginLink>
-                <Button variant="secondary" className="w-full">
-                  Login
-                </Button>
-              </LoginLink>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-      <div>{children}</div>
-    </>
-  );
+  return <div>{children}</div>;
 }
