@@ -1,9 +1,21 @@
 import { Button } from "@/components/ui/button";
 
 import Link from "next/link";
-import React from "react";
+import { useRouter } from "next/navigation";
+import React, { useEffect } from "react";
 
 const Page = () => {
+    const router = useRouter();
+  
+    useEffect(() => {
+      const checkAuth = async () => {
+        const response = await fetch('/api/auth/check');
+        if (!response.ok) {
+          router.push('/sign-in');
+        }
+      };
+      checkAuth();
+    }, [router]);
   return (
     <>
       <div>Assessments</div>
