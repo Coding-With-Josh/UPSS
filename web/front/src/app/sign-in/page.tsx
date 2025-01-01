@@ -1,3 +1,5 @@
+"use server"
+
 import { SignIn } from "./_sign-in";
 
 const Page = () => {
