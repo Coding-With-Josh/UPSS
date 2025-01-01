@@ -26,7 +26,6 @@ import { currentUser } from "@clerk/nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { checkUser } from "@/lib/checkUser";
 
 const data = {
   navMain: [
