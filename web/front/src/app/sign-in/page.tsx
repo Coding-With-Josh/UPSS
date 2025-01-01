@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { LoginLink } from "@kinde-oss/kinde-auth-nextjs";
+import { SignIn } from "./_sign-in";
 
 const Page = () => {
   return (
@@ -7,11 +6,7 @@ const Page = () => {
       <h2 className="font-bold text-xl">
         University Preparatory Secondary School
       </h2>
-      <LoginLink>
-        <Button>
-          Login to your account
-        </Button>
-      </LoginLink>
+      <SignIn/>
     </div>
   );
 };
