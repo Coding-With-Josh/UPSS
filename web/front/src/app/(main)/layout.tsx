@@ -16,9 +16,9 @@ export default async function MainLayout({
 }>) {
   return (
     <>
-      {!user && (
+      {!user || window.location.pathname.endsWith("?notLoggedIn") && (
         <div className="h-screen w-screen flex items-center justify-center bg-black/30">
-          <Card>
+          <Card>  
             <CardHeader>Login to access your account</CardHeader>
             <CardContent>
               <LoginLink>
