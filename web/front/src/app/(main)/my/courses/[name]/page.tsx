@@ -7,8 +7,16 @@ import { Module } from "./_components/module";
 import { Students } from "./_components/students";
 import { Events } from "./_components/events";
 import { ProgressIndicator } from "./_components/progress-indicator";
+import { validateRequest } from "@/lib/lucia";
+import { redirect } from "next/navigation";
 
-const Page = ({ params }: { params: { name: string } }) => {
+const Page = async ({ params }: { params: { name: string } }) => {
+  const { user } = await validateRequest();
+
+  if (!user) {
+    redirect("/sign-in");
+  }
+
   const courseName = params.name.toUpperCase();
 
   return (

@@ -1,7 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import React from "react";
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, FileText, GraduationCap, PlayCircle } from "lucide-react";
@@ -84,7 +85,18 @@ const moduleContent: ModuleContent = {
 };
 
 const Page = ({ params }: { params: { name: string; slug: string } }) => {
+  const router = useRouter();
   const resolvedParams = React.use(Promise.resolve(params));
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const response = await fetch('/api/auth/check');
+      if (!response.ok) {
+        router.push('/sign-in');
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   return (
     <div className="min-h-screen pb-8">
