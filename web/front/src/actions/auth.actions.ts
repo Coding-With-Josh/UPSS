@@ -10,10 +10,11 @@ import * as argon2 from "argon2"
 const cookie = await cookies()
 
 export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
-  const hashedPassword = await argon2.hash(values.password)
-  const userId = generateId(15)
-
   try {
+    console.log("Starting sign up process", values);
+    const hashedPassword = await argon2.hash(values.password)
+    const userId = generateId(15)
+
     const user = await prisma.user.create({
       data: {
         id: userId,
@@ -26,8 +27,8 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
         class: values.class,
         arm: values.arm,
         gender: values.gender,
-        name: `${values.firstName} ${values.lastName}`, // Add this to populate the name field
-        status: "ACTIVE", // Set default status
+        name: `${values.firstName} ${values.lastName}`,
+        status: "ACTIVE",
       },
       select: {
         id: true,
@@ -45,82 +46,68 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
       },
     })
 
+    console.log("User created successfully", user);
+
     const session = await lucia.createSession(userId, {
       expiresIn: 60 * 60 * 24 * 30,
     })
 
     const sessionCookie = lucia.createSessionCookie(session.id)
-
-    cookie.set(
-      sessionCookie.name,
-      sessionCookie.value,
-      sessionCookie.attributes
-    )
+    cookie.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
 
     return {
       success: true,
-      data: user, // Return the complete user object
+      data: user,
     }
   } catch (error: any) {
+    console.error("Sign up error:", error);
     return {
-      error: error?.message,
+      error: error?.message || "Failed to create account",
     }
   }
 }
 
 export const signIn = async (values: z.infer<typeof SignInSchema>) => {
   try {
-    SignInSchema.parse(values)
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        username: values.username,
+      },
+      select: {
+        id: true,
+        password: true,
+      },
+    })
+
+    if (!existingUser || !existingUser.password) {
+      return {
+        error: "Invalid credentials",
+      }
+    }
+
+    const isValidPassword = await argon2.verify(existingUser.password, values.password)
+
+    if (!isValidPassword) {
+      return {
+        error: "Invalid credentials",
+      }
+    }
+
+    const session = await lucia.createSession(existingUser.id, {
+      expiresIn: 60 * 60 * 24 * 30, // 30 days
+    })
+
+    const sessionCookie = lucia.createSessionCookie(session.id)
+    cookie.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
+
+    return {
+      success: true,
+      data: existingUser,
+    }
   } catch (error: any) {
     return {
-      error: error.message,
+      error: "An error occurred during sign in",
     }
-  }
-
-  const existingUser = await prisma.user.findFirst({
-    where: {
-      username: values.username,
-    },
-  })
-
-  if (!existingUser) {
-    return {
-      error: "User not found",
-    }
-  }
-
-  if (!existingUser.password) {
-    return {
-      error: "User not found",
-    }
-  }
-
-  const isValidPassword = await argon2.verify(
-    existingUser.password,
-    values.password
-  )
-
-  if (!isValidPassword) {
-    return {
-      error: "Incorrect username or password",
-    }
-  }
-
-  const session = await lucia.createSession(existingUser.id, {
-    expiresIn: 60 * 60 * 24 * 30,
-  })
-
-  const sessionCookie = lucia.createSessionCookie(session.id)
-
-
-  cookie.set(
-    sessionCookie.name,
-    sessionCookie.value,
-    sessionCookie.attributes
-  )
-
-  return {
-    success: "Logged in successfully",
   }
 }
 

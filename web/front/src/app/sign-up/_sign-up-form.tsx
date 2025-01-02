@@ -19,6 +19,7 @@ import {
 import { toast } from "@/hooks/use-toast"
 import { signUp } from "@/actions/auth.actions"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 type SignUpFormValues = z.infer<typeof SignUpSchema>
 
@@ -27,6 +28,7 @@ export function SignUpForm({
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
   const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(SignUpSchema),
     defaultValues: {
@@ -43,20 +45,40 @@ export function SignUpForm({
     },
   })
 
-  async function onSubmit(values: z.infer<typeof SignUpSchema>) {
-    const res = await signUp(values)
-    if (res.error) {
+  async function onSubmit(values: SignUpFormValues) {
+    try {
+      setIsLoading(true)
+      
+      // Validate passwords match
+      if (values.password !== values.confirmPassword) {
+        toast({
+          variant: "destructive",
+          description: "Passwords do not match",
+        })
+        return
+      }
+
+      const res = await signUp(values)
+      
+      if (res.error) {
+        toast({
+          variant: "destructive",
+          description: res.error,
+        })
+      } else if (res.success) {
+        toast({
+          title: "Account created!",
+          description: "Please log in with your new account",
+        })
+        router.push("/")
+      }
+    } catch (error) {
       toast({
         variant: "destructive",
-        description: res.error,
+        description: "Something went wrong. Please try again.",
       })
-    } else if (res.success) {
-      toast({
-        variant: "default",
-        description: "Account created successfully",
-      })
-
-      router.push("/")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -229,13 +251,43 @@ export function SignUpForm({
             </p>
           )}
         </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Input 
+            {...form.register("confirmPassword")}
+            id="confirmPassword" 
+            type="password"
+            className={cn(form.formState.errors.confirmPassword && "border-red-500")}
+          />
+          {form.formState.errors.confirmPassword && (
+            <p className="text-xs text-red-500">
+              {form.formState.errors.confirmPassword.message}
+            </p>
+          )}
+        </div>
+
         <Button 
           type="submit" 
           className="w-full"
-          disabled={form.formState.isSubmitting}
+          disabled={isLoading || form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? "Logging in..." : "Login"}
+          {isLoading ? (
+            <>
+              <span className="mr-2">Creating account...</span>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-r-transparent" />
+            </>
+          ) : (
+            "Create account"
+          )}
         </Button>
+
+        <div className="text-center text-sm">
+          Already have an account?{" "}
+          <Link href="/sign-in" className="text-primary hover:underline">
+            Sign in
+          </Link>
+        </div>
       </div>
     </form>
   )

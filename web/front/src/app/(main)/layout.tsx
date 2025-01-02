@@ -1,21 +1,12 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  getKindeServerSession,
-  LoginLink,
-} from "@kinde-oss/kinde-auth-nextjs/server";
+import { validateRequest } from "@/lib/lucia";
 import { redirect } from "next/navigation";
 
-const { getUser } = getKindeServerSession();
-const user = await getUser();
+const user = await validateRequest();
 
-{
-  user && console.log(user);
-}
-{
-  !user && redirect("/sign-in");
-}
+  if (!user) {
+    redirect("/sign-in");
+  }
 
 export default async function MainLayout({
   children,
