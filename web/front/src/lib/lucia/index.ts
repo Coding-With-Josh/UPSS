@@ -36,7 +36,6 @@ declare module "lucia" {
   }
 }
 
-
 export const lucia = new Lucia(adapter, {
   sessionCookie: {
     attributes: {
@@ -52,8 +51,8 @@ type ValidateRequestResult = {
 }
 
 export const validateRequest = cache(async (): Promise<ValidateRequestResult> => {
-  const cookieStore = await cookies()
-  const sessionId = cookieStore.get(lucia.sessionCookieName)?.value ?? null
+  const cookie = await cookies()
+  const sessionId = await cookie.get(lucia.sessionCookieName)?.value ?? null
 
   if (!sessionId) {
     return {
@@ -62,62 +61,70 @@ export const validateRequest = cache(async (): Promise<ValidateRequestResult> =>
     }
   }
 
-  const result = await lucia.validateSession(sessionId)
+  const { user, session } = await lucia.validateSession(sessionId)
+  
   try {
-    if (result.session?.fresh) {
-      const sessionCookie = lucia.createSessionCookie(result.session.id)
-      cookieStore.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
+    if (session && session.fresh) {
+      const sessionCookie = lucia.createSessionCookie(session.id)
+      cookie.set(
+        sessionCookie.name,
+        sessionCookie.value,
+        sessionCookie.attributes
+      )
     }
-    if (!result.session) {
+    if (!session) {
       const sessionCookie = lucia.createBlankSessionCookie()
-      cookieStore.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
+      cookie.set(
+        sessionCookie.name,
+        sessionCookie.value,
+        sessionCookie.attributes
+      )
     }
-    // Skip if cookies cannot be modified
-  }
 
-  if (!result.user) {
+    if (!user) {
+      return {
+        user: null,
+        session
+      }
+    }
+
+    const userData = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        username: true,
+        name: true,
+        imageUrl: true,
+        role: true,
+        gender: true,
+        class: true,
+        arm: true,
+        status: true,
+      }
+    })
+
+    if (!userData) {
+      return {
+        user: null,
+        session
+      }
+    }
+
+    return {
+      user: userData as DatabaseUserAttributes & { id: string },
+      session
+    }
+
+  } catch {
     return {
       user: null,
-      session: result.session
+      session: null
     }
-  }
-
-  const userData = await prisma.user.findUnique({
-    where: { id: result.user.id },
-    select: {
-      id: true,
-      email: true,
-      firstName: true,
-      lastName: true,
-      username: true,
-      name: true,
-      imageUrl: true,
-      role: true,
-      gender: true,
-      class: true,
-      arm: true,
-      status: true,
-    }
-  })
-
-  if (!userData) {
-    return {
-      user: null,
-      session: result.session
-    }
-  }
-
-  return {
-    user: userData as DatabaseUserAttributes & { id: string },
-    session: result.session
   }
 })
 
 // Export the types
 export type { DatabaseUserAttributes, ValidateRequestResult }
-
-declare module "lucia" {
-  interface Register {
-    Lucia: typeof lucia
-  }
-}
