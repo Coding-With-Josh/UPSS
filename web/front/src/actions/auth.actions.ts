@@ -1,4 +1,5 @@
 "use server"
+
 import { z } from "zod"
 import { SignInSchema, SignUpSchema } from "../../types"
 import { generateId } from "lucia"
@@ -69,6 +70,7 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
 
 export const signIn = async (values: z.infer<typeof SignInSchema>) => {
   const cookie = await cookies()
+  const valuePassword = await argon2.hash(values.password)
   try {
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -86,7 +88,7 @@ export const signIn = async (values: z.infer<typeof SignInSchema>) => {
       }
     }
 
-    const isValidPassword = await argon2.verify(existingUser.password, values.password)
+    const isValidPassword = await argon2.verify(existingUser.password, valuePassword)
 
     if (!isValidPassword) {
       return {
