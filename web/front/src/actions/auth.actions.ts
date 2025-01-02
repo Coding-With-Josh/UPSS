@@ -7,9 +7,9 @@ import { lucia, validateRequest } from "@/lib/lucia"
 import { cookies } from "next/headers"
 import * as argon2 from "argon2"
 
-const cookie = await cookies()
 
 export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
+  const cookie = await cookies()
   try {
     console.log("Starting sign up process", values);
     const hashedPassword = await argon2.hash(values.password)
@@ -68,6 +68,7 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
 }
 
 export const signIn = async (values: z.infer<typeof SignInSchema>) => {
+  const cookie = await cookies()
   try {
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -112,6 +113,8 @@ export const signIn = async (values: z.infer<typeof SignInSchema>) => {
 }
 
 export const signOut = async () => {
+  const cookie = await cookies()
+
   try {
     const { session } = await validateRequest()
 
