@@ -49,7 +49,6 @@ export function SignUpForm({
     try {
       setIsLoading(true);
 
-      // Validate passwords match
       if (values.password !== values.confirmPassword) {
         toast({
           variant: "destructive",
@@ -59,20 +58,23 @@ export function SignUpForm({
       }
 
       const res = await signUp(values);
-
+      
       if (res.error) {
         toast({
           variant: "destructive",
           description: res.error,
         });
-      } else if (res.success) {
-        toast({
-          title: "Account created!",
-          description: "Please log in with your new account",
-        });
-        router.push("/");
+        return;
       }
+
+      toast({
+        title: "Success",
+        description: "Account created successfully",
+      });
+
+      router.push("/");
     } catch (error) {
+      console.error("Signup error:", error);
       toast({
         variant: "destructive",
         description: "Something went wrong. Please try again.",
@@ -148,6 +150,7 @@ export function SignUpForm({
             <Input
               {...form.register("username")}
               id="username"
+              autoComplete="username"
               placeholder="johndoe"
               className={cn(form.formState.errors.username && "border-red-500")}
             />

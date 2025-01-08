@@ -6,11 +6,11 @@ import { generateId } from "lucia"
 import { prisma } from "@/lib/db"
 import { lucia, validateRequest } from "@/lib/lucia"
 import * as argon2 from "argon2"
-import { setCookie } from "@/lib/actions"
+import { cookies } from "next/headers"
 
 export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
+  const cookie = await cookies()
   try {
-    console.log("Starting sign up process", values)
     const hashedPassword = await argon2.hash(values.password)
     const userId = generateId(15)
 
@@ -45,30 +45,19 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
       },
     })
 
-    console.log("User created successfully", user);
-
-    const session = await lucia.createSession(user.id, {})
-
+    const session = await lucia.createSession(userId, {})
     const sessionCookie = lucia.createSessionCookie(session.id)
-    await setCookie(
-      sessionCookie.name,
-      sessionCookie.value,
-      sessionCookie.attributes
-    )
+    cookie.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
 
-    return {
-      success: true,
-      data: user,
-    }
+    return { success: true, data: user }
   } catch (error: any) {
-    console.error("Sign up error:", error);
-    return {
-      error: error?.message || "Failed to create account",
-    }
+    console.error("Sign up error:", error)
+    return { error: error?.message || "Failed to create account" }
   }
 }
 
 export const signIn = async (values: z.infer<typeof SignInSchema>) => {
+  const cookie = await cookies()
   try {
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -89,7 +78,7 @@ export const signIn = async (values: z.infer<typeof SignInSchema>) => {
     const isValidPassword = await argon2.verify(existingUser.password, values.password)
 
     if (!isValidPassword) {
-      return {
+     return {
         error: "Invalid credentials",
       }
     }
@@ -99,7 +88,7 @@ export const signIn = async (values: z.infer<typeof SignInSchema>) => {
     })
 
     const sessionCookie = lucia.createSessionCookie(session.id)
-    await setCookie(
+    await cookie.set(
       sessionCookie.name,
       sessionCookie.value,
       sessionCookie.attributes
@@ -117,6 +106,7 @@ export const signIn = async (values: z.infer<typeof SignInSchema>) => {
 }
 
 export const signOut = async () => {
+  const cookie = await cookies()
   try {
     const { session } = await validateRequest()
 
@@ -130,7 +120,7 @@ export const signOut = async () => {
 
     const sessionCookie = lucia.createBlankSessionCookie()
 
-    await setCookie(
+    await cookie.set(
       sessionCookie.name,
       sessionCookie.value,
       sessionCookie.attributes
