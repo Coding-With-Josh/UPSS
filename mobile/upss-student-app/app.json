@@ -25,6 +25,12 @@
     "plugins": [
       "expo-router",
       [
+        "expo-font",
+        {
+          "fonts": ["node_modules/@expo-google-fonts/quicksand/Quicksand_400Regular.ttf"]
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
