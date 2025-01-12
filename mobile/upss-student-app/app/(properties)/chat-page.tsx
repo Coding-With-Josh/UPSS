@@ -86,10 +86,12 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     messageContainer: {
+        minWidth: '10%',
         maxWidth: '80%',
         marginVertical: 4,
         paddingHorizontal: 12,
-        borderRadius: 16,
+        paddingVertical: 3,
+        borderRadius: 12,
     },
     userMessage: {
         alignSelf: 'flex-end',
