@@ -71,7 +71,7 @@ export const signIn = async (values: z.infer<typeof SignInSchema>) => {
 
     if (!existingUser || !existingUser.password) {
       return {
-        error: "Invalid credentials",
+        error: "...",
       }
     }
 
@@ -83,9 +83,7 @@ export const signIn = async (values: z.infer<typeof SignInSchema>) => {
       }
     }
 
-    const session = await lucia.createSession(existingUser.id, {
-      expiresIn: 60 * 60 * 24 * 30, // 30 days
-    })
+    const session = await lucia.createSession(existingUser.id, {})
 
     const sessionCookie = lucia.createSessionCookie(session.id)
     await cookie.set(
@@ -100,7 +98,7 @@ export const signIn = async (values: z.infer<typeof SignInSchema>) => {
     }
   } catch (error: any) {
     return {
-      error: "An error occurred during sign in",
+      error: error,
     }
   }
 }

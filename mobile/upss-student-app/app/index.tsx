@@ -65,12 +65,33 @@ const Onboarding = () => {
         <TouchableOpacity
           className="flex justify-center items-center bg-blue-600 w-fit py-3 text-white rounded-md shadow-md"
           onPress={() => router.push("/sign-in")}
+          style={{
+
+            width: "100%",
+          }}
         >
+          
           <Text
             className="text-white font-semibold"
             style={{ fontFamily: "Quicksand_700Bold" }}
           >
-            Continue
+            Demo
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="flex justify-center items-center bg-blue-600 w-fit py-3 text-white rounded-md shadow-md"
+          onPress={() => router.push("/login")}
+          style={{
+            marginTop: 9, 
+            width: "100%",
+          }}
+        >
+          
+          <Text
+            className="text-white font-semibold"
+            style={{ fontFamily: "Quicksand_700Bold" }}
+          >
+            Test Auth
           </Text>
         </TouchableOpacity>
       </View>
@@ -79,10 +100,3 @@ const Onboarding = () => {
 };
 
 export default Onboarding;
-// Add onboarding content within the first View
-
-const styles = StyleSheet.create({
-  formAction: {
-    marginVertical: 24,
-  },
-});

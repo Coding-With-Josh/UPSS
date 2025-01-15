@@ -30,19 +30,38 @@ export function SignInForm({
   })
 
   async function onSubmit(values: z.infer<typeof SignInSchema>) {
-    const res = await signIn(values)
-    if (res.error) {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok) {
+        toast({
+          variant: "destructive",
+          description: "error",
+        });
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: "Logged in successfully",
+      });
+
+      router.push("/");
+    } catch (error) {
+      console.error("Signin error:", error);
       toast({
         variant: "destructive",
-        description: res.error,
-      })
-    } else if (res.success) {
-      toast({
-        variant: "default",
-        description: "Signed in successfully",
-      })
-
-      router.push("/")
+        description: "Something went wrong. Please try again.",
+      });
+    } finally {
     }
   }
 
