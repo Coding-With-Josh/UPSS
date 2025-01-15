@@ -1,56 +1,28 @@
 "use client";
 
-import { AppSidebar } from "@/components/app-sidebar";
-import { EventsCalendar } from "@/components/dashboard/events-calendar";
 import { GradesTable } from "@/components/dashboard/grades-table";
-import { Navbar } from "@/components/dashboard/navbar";
 import { ProgressCard } from "@/components/dashboard/progress-card";
-import { Button } from "@/components/ui/button";
 
-import { Calendar } from "@/components/ui/calendar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import {
   ArrowUpRightFromSquare,
-  CalendarIcon,
   Download,
   EllipsisVertical,
   FileQuestion,
   Filter,
-  Plus,
   School,
   User2,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
-import { toast } from "@/hooks/use-toast";
 import { CreateTask } from "@/components/dashboard/create-task";
 import { ClickableIcon } from "@/components/reusable/clickable-icon";
+import { validateRequest } from "@/lib/lucia";
+import { redirect } from "next/navigation";
 
 const Page = async () => { 
-  // const user = await currentUser();
-
-  // if (!user)
-  //   return (
-  //     <div className="flex items-center justify-center w-screen h-screen">
-  //       {redirect("/sign-in")}
-  //     </div>
-  // );
+  const user = validateRequest()
+  if (!user) {
+    redirect("/sign-in")
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">

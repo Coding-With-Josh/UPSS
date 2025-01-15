@@ -22,8 +22,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { currentUser } from "@clerk/nextjs/server";
-import Image from "next/image";
+  import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -188,12 +187,22 @@ const data = {
 
 interface ClientSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: {
-    name?: string | null;
-    email?: string | null;
+    id: any,
+    username: any,
+    email: any,
+    firstName: any,
+    lastName: any,
+    name: any,
+    imageUrl: any,
+    role: any,
+    gender: any,
+    class: any,
+    arm: any,
+    status: any,
   };
 }
 
-export async function ClientSidebar({ user, ...props }: ClientSidebarProps) {
+export async function ClientSidebar({ user }: ClientSidebarProps) {
   const pathname = usePathname();
   return (
     <Sidebar {...props}>
@@ -201,7 +210,7 @@ export async function ClientSidebar({ user, ...props }: ClientSidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href={user ? "/my" : "http://upss.vercel.app?notLoggedIn"}>
+              <Link href={user ? "/my" : "http://upss.vercel.app/sign-in"}>
                 <div className="flex size-8 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
                   <Image
                     src={require("@/assets/images/avatars/avatar1.png")}

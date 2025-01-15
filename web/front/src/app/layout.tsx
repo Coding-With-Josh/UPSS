@@ -46,6 +46,7 @@ export default async function RootLayout({
               <Toaster />
             </SidebarInset>
           </SidebarProvider>
+        
         </ThemeProvider>
       </body>
     </html>

@@ -1,5 +1,7 @@
-import { validateRequest } from "@/lib/lucia";
-import type { DatabaseUserAttributes } from "@/lib/lucia";
+"use server"
+
+// import { validateRequest } from "@/lib/lucia";
+
 import { ClientSidebar } from "./dashboard/sidebar";
 
 export async function AppSidebar() {
