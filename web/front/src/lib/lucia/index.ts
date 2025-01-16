@@ -1,9 +1,10 @@
-
+"use server"
 import { Lucia } from "lucia"
 import { adapter } from "./adapter"
 import { cookies } from "next/headers"
 import { cache } from "react"
 import { prisma } from "@/lib/db"
+import { lucia } from "./lucia"
 
 // Add custom type for extended user response
 type DatabaseUserAttributes = {
@@ -36,15 +37,6 @@ declare module "lucia" {
     status: "ACTIVE" | "INACTIVE" | "EXPELLED";
   }
 }
-
-export const lucia = new Lucia(adapter, {
-  sessionCookie: {
-    attributes: {
-      // set to `true` when using HTTPS
-      secure: process.env.NODE_ENV === "production",
-    },
-  },
-})
 
 type ValidateRequestResult = {
   user: (DatabaseUserAttributes & { id: string }) | null;

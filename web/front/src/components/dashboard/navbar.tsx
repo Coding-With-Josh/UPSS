@@ -13,13 +13,48 @@ import {
 } from "../ui/breadcrumb";
 import { ModeToggle } from "../ui/mode-toggle";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "../ui/sidebar";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Bell, LogOut } from "lucide-react";
 import { Button } from "../ui/button";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs";
+import { signOut } from "@/actions/auth.actions";
+import { toast } from "@/hooks/use-toast";
 
 export const Navbar = () => {
   const pathname = usePathname();
+  const router = useRouter()
+
+  const logOut = async () => {
+    try {
+      const res = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (!res.ok) {
+        toast({
+          variant: "destructive",
+          description: "error",
+        });
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: "Logged out successfully",
+      });
+
+      router.push("/sign-in");
+    } catch (error) {
+      console.error("Signout error:", error);
+      toast({
+        variant: "destructive",
+        description: "Something went wrong. Please try again.",
+      });
+    }
+  }
 
   return (
     <>
@@ -52,11 +87,9 @@ export const Navbar = () => {
             <Bell size={18} />
           </Button>
           <ModeToggle />
-          <LogoutLink>
-          <Button size="icon" variant="ghost">
+          <Button size="icon" variant="ghost" onClick={logOut}>
             <LogOut size={18} />
           </Button>
-          </LogoutLink>
         </div>
       </header>
     </>

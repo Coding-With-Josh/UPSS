@@ -1,12 +1,12 @@
 import React from "react";
-import { validateRequest } from "@/lib/lucia";
-import { redirect } from "next/navigation";
+// import { validateRequest } from "@/lib/lucia";
+// import { redirect } from "next/navigation";
 
-const user = await validateRequest();
+// const user = await validateRequest();
 
-  if (!user) {
-    redirect("/sign-in");
-  }
+//   if (!user) {
+//     redirect("/sign-in");
+//   }
 
 export default async function MainLayout({
   children,

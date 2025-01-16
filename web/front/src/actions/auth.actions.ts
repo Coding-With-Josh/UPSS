@@ -4,9 +4,10 @@ import { z } from "zod"
 import { SignInSchema, SignUpSchema } from "../../types"
 import { generateId } from "lucia"
 import { prisma } from "@/lib/db"
-import { lucia, validateRequest } from "@/lib/lucia"
+import { validateRequest } from "@/lib/lucia"
 import * as argon2 from "argon2"
 import { cookies } from "next/headers"
+import { lucia } from "@/lib/lucia/lucia"
 
 export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
   const cookie = await cookies()

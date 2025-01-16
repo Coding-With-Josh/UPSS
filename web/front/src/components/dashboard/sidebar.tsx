@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/sidebar";
   import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 const data = {
   navMain: [
@@ -202,9 +201,7 @@ interface ClientSidebarProps extends React.ComponentProps<typeof Sidebar> {
   };
 }
 
-export async function ClientSidebar({ user }: ClientSidebarProps) {
-  const pathname = usePathname();
-  return (
+export async function ClientSidebar({ user, ...props }: ClientSidebarProps) {  return (
     <Sidebar {...props}>
       <SidebarHeader>
         <SidebarMenu>
@@ -223,11 +220,7 @@ export async function ClientSidebar({ user }: ClientSidebarProps) {
                     {user?.name ? user.name : !user?.name ? "Student" : "Guest"}
                   </span>
                   <span className="text-muted-foreground text-xs">
-                    {user?.email
-                      ? user.email
-                      : !user?.email
-                      ? "guest@upsshub.com"
-                      : "Sign in"}
+                    {user?.class + " " + user?.arm}
                   </span>
                 </div>
               </Link>
@@ -242,7 +235,7 @@ export async function ClientSidebar({ user }: ClientSidebarProps) {
             <SidebarMenuItem>
               <Link href="/">
                 <SidebarMenuButton
-                  isActive={pathname === "" || "/" ? true : false}
+                  isActive={window.location.pathname === "" || "/" ? true : false}
                 >
                   Home
                 </SidebarMenuButton>
@@ -270,7 +263,7 @@ export async function ClientSidebar({ user }: ClientSidebarProps) {
                             <SidebarMenuSubButton
                               asChild
                               isActive={
-                                pathname.startsWith(item.url) ? true : false
+                                window.location.pathname.startsWith(item.url) ? true : false
                               }
                             >
                               <Link href={item.url}>{item.title}</Link>
@@ -287,7 +280,7 @@ export async function ClientSidebar({ user }: ClientSidebarProps) {
               <Link href="/settings">
                 <SidebarMenuButton
                   isActive={
-                    pathname === "/settings" || pathname.startsWith("/settings")
+                    window.location.pathname === "/settings" || window.location.pathname.startsWith("/settings")
                       ? true
                       : false
                   }
